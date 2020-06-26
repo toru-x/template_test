@@ -1,0 +1,212 @@
+<html>
+<head>
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app" class="p-5 text-lg">
+        <h1 class="text-3xl mb-10">時・分２つのセレクトボックスを使った時間入力コンポーネント</h1>
+        <v-hour-minute
+            name="start_time"
+            v-model="time1">
+        </v-hour-minute>&nbsp;｜&nbsp;選択された時刻：{{ time1 }}
+
+        <hr class="my-5">
+
+        <v-hour-minute-ampm
+            name="start_time"
+            v-model="time2">
+        </v-hour-minute-ampm>&nbsp;｜&nbsp;選択された時刻：{{ time2 }}
+
+        <hr class="my-5">
+
+        <button class="bg-gray-100 p-2 border" type="button" @click="changeTime">時間を動的に変更</button>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.0"></script>
+    <script>
+
+        Vue.component('v-hour-minute', {
+            props: {
+                name: String,
+                value: String
+            },
+            template: `<span class="border p-1">
+                    <select v-model="hours" @change="onChange">
+                        <option></option>
+                        <option v-for="(text,value) in options(24)" :value="value" v-text="text"></option>
+                    </select>
+                    <span>：</span>
+                    <select v-model="minutes" @change="onChange">
+                        <option></option>
+                        <option v-for="(text,value) in options(60)" :value="value" v-text="text"></option>
+                    </select>
+                    <input :name="name" type="hidden" v-model="value">
+                </span>`,
+            data() {
+                return {
+                    hours: '',
+                    minutes: ''
+                };
+            },
+            methods: {
+                onChange() {
+
+                    let time = '';
+
+                    if(this.hours && this.minutes) {
+
+                        time = this.hours.toString().padStart(2, '0') +':'+
+                            this.minutes.toString().padStart(2, '0');
+
+                    }
+
+                    this.$emit('input', time);
+
+                },
+                options(limitValue) {
+
+                    let options = {};
+
+                    for(let i = 0 ; i < limitValue ; i++) {
+
+                        options[i] = i.toString().padStart(2, '0');
+
+                    }
+
+                    return options;
+
+                },
+                setTime() {
+
+                    const matches = this.value.match(/([0-9]{2}):([0-9]{2})/);
+
+                    // すでに値が存在している場合
+                    if(matches) {
+
+                        this.hours = parseInt(matches[1]);
+                        this.minutes = parseInt(matches[2]);
+
+                    }
+
+                }
+            },
+            watch: {
+                value() {
+
+                    this.setTime();
+
+                }
+            },
+            mounted() {
+
+                this.setTime();
+
+            }
+        });
+
+        Vue.component('v-hour-minute-ampm', {
+            props: {
+                name: String,
+                value: String
+            },
+            template: `<span class="border p-1">
+                    <select v-model="ampm" @change="onChange">
+                        <option></option>
+                        <option value="AM">AM</option>
+                        <option value="PM">PM</option>
+                    </select>&nbsp;
+                    <select v-model="hours" @change="onChange">
+                        <option></option>
+                        <option v-for="(text,value) in options(24)" :value="value" v-text="text"></option>
+                    </select>
+                    <span>：</span>
+                    <select v-model="minutes" @change="onChange">
+                        <option></option>
+                        <option v-for="(text,value) in options(60)" :value="value" v-text="text"></option>
+                    </select>
+                    <input :name="name" type="hidden" v-model="value">
+                </span>`,
+            data() {
+                return {
+                    ampm: '',
+                    hours: '',
+                    minutes: ''
+                };
+            },
+            methods: {
+                onChange() {
+
+                    let time = '';
+
+                    if(this.ampm && this.hours && this.minutes) {
+
+                        time = this.ampm +' '+
+                            this.hours.toString().padStart(2, '0') +':'+
+                            this.minutes.toString().padStart(2, '0');
+
+                    }
+
+                    this.$emit('input', time);
+
+                },
+                options(limitValue) {
+
+                    let options = {};
+
+                    for(let i = 0 ; i < limitValue ; i++) {
+
+                        options[i] = i.toString().padStart(2, '0');
+
+                    }
+
+                    return options;
+
+                },
+                setTime() {
+
+                    const matches = this.value.match(/(AM|PM) ([0-9]{2}):([0-9]{2})/);
+
+                    // すでに値が存在している場合
+                    if(matches) {
+
+                        this.ampm = matches[1];
+                        this.hours = parseInt(matches[2]);
+                        this.minutes = parseInt(matches[3]);
+
+                    }
+
+                }
+            },
+            watch: {
+                value() {
+
+                    this.setTime();
+
+                }
+            },
+            mounted() {
+
+                this.setTime();
+
+            }
+        });
+
+        new Vue({
+            el: '#app',
+            data: {
+                time1: '22:15',
+                time2: 'AM 22:15',
+            },
+            methods: {
+                changeTime() {
+
+                    this.time1 = '10:35';
+                    this.time2 = 'PM 11:35';
+
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
